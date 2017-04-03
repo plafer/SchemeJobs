@@ -11,6 +11,7 @@ enum scm_type {
   TYPE_SYM,
   TYPE_INT,
   TYPE_PAIR,
+  TYPE_KEYWORD,
 };
 
 struct astnode {
@@ -34,6 +35,11 @@ struct astnode_pair {
   ASTNODE_BASE
   struct astnode *car;
   struct astnode *cdr;
+};
+
+struct astnode_keyword {
+  ASTNODE_BASE
+  char *keyword;
 };
 
 #endif
