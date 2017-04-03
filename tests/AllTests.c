@@ -4,6 +4,8 @@
 
 CuSuite* SymbolsGetSuite();
 
+// Note: CuSuite runs all the tests in the same process (i.e. changes made in
+// one test are still there in all other tests that run after).
 void RunAllTests(void)
 {
 	CuString *output = CuStringNew();

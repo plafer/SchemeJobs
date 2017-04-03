@@ -20,7 +20,7 @@ struct astnode {
 //Note: empty pair () is going to be a symbol
 struct astnode_sym {
   ASTNODE_BASE
-  uint32_t symi;
+  void *symi;
 };
 
 struct astnode_int {

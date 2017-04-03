@@ -9,14 +9,14 @@
 // not NULL, the index of `symval` in the table is written in `index`. If the
 // symbol is already in the table, its index is simply written in `index`.
 // Possible errors:
-// + EINVAL: symval_start > symval_end
-// + ENOMEM: Failed to allocate memory for the table.
-int putsym(char *symval_start, char *symval_end, uint32_t *index);
+// + EINVAL: symval_start > symval_end, or either are NULL
+// + ENOMEM: Failed to allocate memory for the table or internal buffer.
+int putsym(char *symval_start, char *symval_end, void **index);
 
 // Retrieve a symbol from the symbol table at index `index`. `symval` is
 // modified to point to the internal buffer that contains the symbol value.
 // Possible errors:
-// + EINVAL: There is no symbol at index `index`, or `symval` in NULL
-int getsym(uint32_t index, const char **symval);
+// + EINVAL: There is no symbol at index `index`, or `symval` is NULL
+int getsym(void *index, const char **symval);
 
 #endif

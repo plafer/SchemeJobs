@@ -20,21 +20,20 @@ CFLAGS := -Wall -Wextra -I.
 CFLAGS_DEBUG := $(CFLAGS) -gstabs
 CFLAGS_PROD := $(CFLAGS) -O2 -Werror
 
-$(OUT_BIN_NAME): TAGS $(OBJ_FILES) $(INC_FILES)
+$(OUT_BIN_NAME): $(OBJ_FILES) $(INC_FILES)
 	$(CC) -o $@ $(OBJ_FILES) $(CFLAGS_PROD)
+
+debug: TAGS $(OBJ_FILES) $(INC_FILES)
+	$(CC) -o $(OUT_BIN_NAME) $(OBJ_FILES) $(CFLAGS_DEBUG)
 
 ## TODO: Validate that prod executable files don't end up with stabs symbols
 $(OBJDIR)/%.o: $(OBJDIR) $(SRC_FILES)
 	$(CC) $(CFLAGS_DEBUG) -o $@ -c $(SRCDIR)/$*.c
 
-debug: TAGS $(OBJ_FILES) $(INC_FILES)
-	$(CC) -o $(OUT_BIN_NAME) $(OBJ_FILES) $(CFLAGS_DEBUG)
-
 .PHONY: testsuite
 testsuite: $(OBJ_FILES_TEST) $(INC_FILES)
-	$(CC) -o $@ $(CFLAGS) $(TESTS_FILES) $(OBJ_FILES_TEST)
+	$(CC) -o $@ $(CFLAGS_DEBUG) $(TESTS_FILES) $(OBJ_FILES_TEST)
 	./$@
-	rm $@
 
 .PHONY: TAGS
 TAGS:
