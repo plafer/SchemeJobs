@@ -1,0 +1,7 @@
+## C code conventions
++ Functions return 0 on success and an errno value on error. The documentation
+should clearly explained what errno value is to be expected and exactly what it
+means in the context of the function.
+      + If a function is guaranteed to succeed, it is ok to make it void.
+      + Out parameters should be used to return actual data.
++ Don't typedef structs.
