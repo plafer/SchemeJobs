@@ -171,7 +171,7 @@ void TestGetSym_NullSymval(CuTest *tc) {
 }
 
 void TestPutSym_SecondPageAndGet(CuTest *tc) {
-  #define BUFSIZE 40
+  #define BUFSIZE 30
   char *lastsymbol = "Hello, world!";
   const char *lastsymbolget;
   char buf[BUFSIZE];

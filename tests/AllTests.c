@@ -3,6 +3,8 @@
 #include "CuTest.h"
 
 CuSuite* SymbolsGetSuite();
+CuSuite* EnvGetSuite();
+CuSuite* PrmtGetSuite();
 
 // Note: CuSuite runs all the tests in the same process (i.e. changes made in
 // one test are still there in all other tests that run after).
@@ -12,6 +14,8 @@ void RunAllTests(void)
 	CuSuite* suite = CuSuiteNew();
 
 	CuSuiteAddSuite(suite, SymbolsGetSuite());
+	CuSuiteAddSuite(suite, EnvGetSuite());
+	CuSuiteAddSuite(suite, PrmtGetSuite());
 
 	CuSuiteRun(suite);
 	CuSuiteSummary(suite, output);
