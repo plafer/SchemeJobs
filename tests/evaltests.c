@@ -156,6 +156,57 @@ void TestEval_Prmtproc(CuTest *tc) {
   CuAssertPtrEquals(tc, prmt_cons, ret->handler);
 }
 
+void TestEval_Compproc(CuTest *tc) {
+  int err;
+  struct astnode_compproc proc;
+  struct astnode_compproc *ret;
+
+  proc.type = TYPE_COMPPROC;
+
+  err = eval((struct astnode *) &proc, env, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_COMPPROC, ret->type);
+}
+
+void TestEvalMany_NullArg(CuTest *tc) {
+  int err;
+
+  err = eval_many(NULL, NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+// A better test would make sure that the first element was also evaluated, for
+// example with a define keyword.
+void TestEvalMany_ValidObj(CuTest *tc) {
+  const int VAL1 = 55;
+  const int VAL2 = 66;
+  int err;
+  struct astnode_int num2 = {
+    .type = TYPE_INT,
+    .intval = VAL2
+  };
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num2,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+  struct astnode_int *ret;
+
+  err = eval_many(&first_pair, env, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, VAL2, ret->intval);
+}
+
 void TestApply_NullArg(CuTest *tc) {
   int err;
 
@@ -166,7 +217,6 @@ void TestApply_NullArg(CuTest *tc) {
 CuSuite* EvalGetSuite() {
   CuSuite* suite = CuSuiteNew();
 
-  // TODO: Add compound procedures
   // TODO: Add test that applies a keyword handler (e.g. define)
 
   SUITE_ADD_TEST(suite, TestEval_InitEnv);
@@ -178,6 +228,9 @@ CuSuite* EvalGetSuite() {
   SUITE_ADD_TEST(suite, TestEval_Env);
   SUITE_ADD_TEST(suite, TestEval_Keyword);
   SUITE_ADD_TEST(suite, TestEval_Prmtproc);
+  SUITE_ADD_TEST(suite, TestEval_Compproc);
+  SUITE_ADD_TEST(suite, TestEvalMany_NullArg);
+  SUITE_ADD_TEST(suite, TestEvalMany_ValidObj);
   SUITE_ADD_TEST(suite, TestApply_NullArg);
 
   return suite;

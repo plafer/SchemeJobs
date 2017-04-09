@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define ASTNODE_BASE astnode_type type;
+#define ASTNODE_BASE astnode_type type
 
 // No strings for now.
 // Only one type of number for now: 32 bit signed int.
@@ -16,20 +16,21 @@ typedef enum {
   TYPE_ENV,
   TYPE_KEYWORD,
   TYPE_PRMTPROC,
+  TYPE_COMPPROC,
   TYPE_MAX,
 } astnode_type;
 
 struct astnode {
-  ASTNODE_BASE
+  ASTNODE_BASE;
 };
 
 struct astnode_sym {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   void *symi;
 };
 
 struct astnode_int {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   int32_t intval;
 };
 
@@ -39,7 +40,7 @@ struct astnode_int {
 // as false"
 // https://www.gnu.org/software/mit-scheme/documentation/mit-scheme-ref/True-and-False.html
 struct astnode_boolean {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   bool boolval;
 };
 
@@ -52,7 +53,7 @@ extern struct astnode_boolean _boolean_false;
 // Functions should use is_empty_list(node) to check if a node is the empty list.
 // Note: (pair? '()) must return false.
 struct astnode_pair {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   struct astnode *car;
   struct astnode *cdr;
 };
@@ -63,7 +64,7 @@ extern struct astnode_pair _empty_list;
 
 // Example bindings: ((+ <proc>) (var <int>) ...)
 struct astnode_env {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   struct astnode_env *parent;
   struct astnode_pair *bindings;
 };
@@ -82,7 +83,7 @@ typedef int (*kw_handler)(struct astnode_pair *args, struct astnode_env *env,
 // syntax).
 // TODO: Verify this in SICP metacircular evaluator.
 struct astnode_keyword {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   kw_handler handler;
 };
 
@@ -90,10 +91,16 @@ struct astnode_keyword {
 typedef int (*prmt_handler)(struct astnode_pair *args, struct astnode **ret);
 
 struct astnode_prmtproc {
-  ASTNODE_BASE
+  ASTNODE_BASE;
   prmt_handler handler;
 };
 
+struct astnode_compproc {
+  ASTNODE_BASE;
+  struct astnode_pair *body;
+  struct astnode_env *env;
+  struct astnode_pair *params;
+};
 
 bool is_empty_list(struct astnode *node);
 

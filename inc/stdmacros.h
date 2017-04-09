@@ -30,4 +30,9 @@
   if ((astnode)->type != (type_req))		\
     return EBADMSG
 
+#define TYPE_CHECK2(astnode, type1, type2)				\
+  if ((astnode)->type != (type1) && (astnode)->type != (type2))		\
+    return EBADMSG
+
+
 #endif

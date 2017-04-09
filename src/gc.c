@@ -59,6 +59,8 @@ int alloc_astnode(astnode_type type, struct astnode **ret)
     case TYPE_PRMTPROC:
       new_node = malloc(sizeof(struct astnode_prmtproc));
       break;
+    case TYPE_COMPPROC:
+      new_node = malloc(sizeof(struct astnode_compproc));
     case TYPE_MAX:
       // Compiler happy
       return EINVAL;

@@ -76,15 +76,13 @@ static int eval_pair(struct astnode_pair *node, struct astnode_env *env,
       keyword = (struct astnode_keyword *) evaled_car;
       RETONERR(keyword->handler(evaled_args, env, ret));
     }
-  else if (evaled_car->type == TYPE_PRMTPROC)
+  else
     {
       struct astnode_pair *evaled_args;
 
       RETONERR(eval_list((struct astnode_pair *) node->cdr, env, &evaled_args));
       RETONERR(apply(evaled_car, evaled_args, ret));
     }
-  else
-    return EBADMSG;
 
   return 0;
 }
@@ -137,6 +135,10 @@ int eval(struct astnode *node, struct astnode_env *env, struct astnode **ret)
       *ret = node;
       err = 0;
       break;
+    case TYPE_COMPPROC:
+      *ret = node;
+      err = 0;
+      break;
       // To keep compiler happy
     case TYPE_MAX:
       err = EINVAL;
@@ -146,16 +148,50 @@ int eval(struct astnode *node, struct astnode_env *env, struct astnode **ret)
   return err;
 }
 
+int eval_many(struct astnode_pair *stmts, struct astnode_env *env,
+	      struct astnode **ret)
+{
+  struct astnode *ret_temp;
+  NULL_CHECK3(stmts, env, ret);
+
+  if (is_empty_list((struct astnode *) stmts))
+    {
+      *ret = (struct astnode *) EMPTY_LIST;
+      return 0;
+    }
+
+  for ( ;
+	!is_empty_list((struct astnode *) stmts);
+	stmts = (struct astnode_pair *) stmts->cdr)
+    {
+      TYPE_CHECK(stmts, TYPE_PAIR);
+
+      RETONERR(eval(stmts->car, env, &ret_temp));
+    }
+
+  *ret = ret_temp;
+
+  return 0;
+}
+
 int apply(struct astnode *proc, struct astnode_pair *args, struct astnode **ret)
 {
   NULL_CHECK2(proc, args);
 
-  // TODO: Allow compound procedures once they're implemented
-  TYPE_CHECK(proc, TYPE_PRMTPROC);
-
+  TYPE_CHECK2(proc, TYPE_PRMTPROC, TYPE_COMPPROC);
   if (proc->type == TYPE_PRMTPROC)
     {
       RETONERR(((struct astnode_prmtproc *) proc)->handler(args, ret));
+    }
+  else
+    {
+      struct astnode_compproc *compound_proc;
+      struct astnode_env *extended_env;
+
+      compound_proc = (struct astnode_compproc *) proc;
+      RETONERR(extend_env(compound_proc->env, compound_proc->params, args,
+			  &extended_env));
+      RETONERR(eval_many(compound_proc->body, extended_env, ret));
     }
 
   return 0;
