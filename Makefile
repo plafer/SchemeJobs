@@ -18,7 +18,7 @@ OBJ_FILES_TEST := $(filter-out obj/main.o, $(OBJ_FILES))
 
 CFLAGS := -Wall -Wextra -I.
 CFLAGS_DEBUG := $(CFLAGS) -gstabs
-CFLAGS_PROD := $(CFLAGS) -O2 -Werror
+CFLAGS_PROD := $(CFLAGS) -O3 -Werror
 
 $(OUT_BIN_NAME): $(OBJ_FILES) $(INC_FILES)
 	$(CC) -o $@ $(OBJ_FILES) $(CFLAGS_PROD)

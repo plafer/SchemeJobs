@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
@@ -5,14 +6,56 @@
 #include "inc/ast.h"
 #include "inc/env.h"
 #include "inc/eval.h"
+#include "inc/gc.h"
 #include "inc/stdmacros.h"
+
+// Takes a list of objects to evaluate and returns a list of the corresponding
+// objects evaluated.
+static int eval_list(struct astnode_pair *unevaled_args, struct astnode_env *env,
+		     struct astnode_pair **ret)
+{
+  struct astnode_pair *evaled_args;
+  struct astnode_pair *evaled_args_prev;
+  struct astnode_pair *ret_temp;
+
+  assert(unevaled_args != NULL && env != NULL && ret != NULL);
+
+  if (is_empty_list((struct astnode *) unevaled_args))
+    {
+      *ret = unevaled_args;
+      return 0;
+    }
+
+  for (evaled_args_prev = NULL;
+       !is_empty_list((struct astnode *) unevaled_args);
+       unevaled_args = (struct astnode_pair *) unevaled_args->cdr,
+       evaled_args_prev = evaled_args)
+    {
+      TYPE_CHECK((struct astnode *) unevaled_args, TYPE_PAIR);
+
+      // Allocate pair object and link to previous. Keep a reference to the
+      // beginning of the list on the first iteration.
+      RETONERR(alloc_astnode(TYPE_PAIR, (struct astnode **) &evaled_args));
+      if (evaled_args_prev == NULL)
+	ret_temp = evaled_args;
+      else
+	evaled_args_prev->cdr = (struct astnode *) evaled_args;
+
+      // Eval current argument and store in `evaled_args` list
+      RETONERR(eval((struct astnode *) unevaled_args->car, env, &evaled_args->car));
+    }
+
+  evaled_args_prev->cdr = (struct astnode *) EMPTY_LIST;
+  *ret = ret_temp;
+
+  return 0;
+}
 
 // Two possibilities: (define a 3) or (+ 1 2)
 static int eval_pair(struct astnode_pair *node, struct astnode_env *env,
 		     struct astnode **ret)
 {
   struct astnode *evaled_car;
-  int err;
 
   // If empty list, evaluate to itself
   if (is_empty_list((struct astnode *)node))
@@ -21,24 +64,29 @@ static int eval_pair(struct astnode_pair *node, struct astnode_env *env,
       return 0;
     }
 
-  err = eval(node->car, env, &evaled_car);
-  if (err != 0)
-    return err;
+  RETONERR(eval(node->car, env, &evaled_car));
 
   if (evaled_car->type == TYPE_KEYWORD)
     {
-      struct astnode_keyword *keyword = (struct astnode_keyword *) evaled_car;
-      err = keyword->handler((struct astnode_pair *) node->cdr, env, ret);
+      struct astnode_pair *evaled_args;
+      struct astnode_keyword *keyword;
+
+      RETONERR(eval_list((struct astnode_pair *) node->cdr, env, &evaled_args));
+
+      keyword = (struct astnode_keyword *) evaled_car;
+      RETONERR(keyword->handler(evaled_args, env, ret));
     }
   else if (evaled_car->type == TYPE_PRMTPROC)
     {
-      struct astnode_prmtproc *proc = (struct astnode_prmtproc *) evaled_car;
-      err = proc->handler((struct astnode_pair *) node->cdr, ret);
+      struct astnode_pair *evaled_args;
+
+      RETONERR(eval_list((struct astnode_pair *) node->cdr, env, &evaled_args));
+      RETONERR(apply(evaled_car, evaled_args, ret));
     }
   else
-    err = EBADMSG;
+    return EBADMSG;
 
-  return err;
+  return 0;
 }
 
 // TODO: To support tail calls, we can add a flag `istailcall`, which will get
@@ -51,6 +99,7 @@ int eval(struct astnode *node, struct astnode_env *env, struct astnode **ret)
 
   NULL_CHECK3(node, env, ret);
 
+  assert(node->type < TYPE_MAX);
   switch (node->type)
     {
       // Symbols evaluate to their binding in the environment
@@ -83,16 +132,31 @@ int eval(struct astnode *node, struct astnode_env *env, struct astnode **ret)
       *ret = NULL;
       err = EBADMSG;
       break;
-      // Primitive procedures are not expressions: it is an error to evaluate them
+      // Primitive procedures evaluate to themselves
     case TYPE_PRMTPROC:
       *ret = node;
       err = 0;
       break;
-    default:
-      *ret = NULL;
-      err = EBADMSG;
+      // To keep compiler happy
+    case TYPE_MAX:
+      err = EINVAL;
       break;
     }
 
   return err;
+}
+
+int apply(struct astnode *proc, struct astnode_pair *args, struct astnode **ret)
+{
+  NULL_CHECK2(proc, args);
+
+  // TODO: Allow compound procedures once they're implemented
+  TYPE_CHECK(proc, TYPE_PRMTPROC);
+
+  if (proc->type == TYPE_PRMTPROC)
+    {
+      RETONERR(((struct astnode_prmtproc *) proc)->handler(args, ret));
+    }
+
+  return 0;
 }

@@ -12,6 +12,12 @@ struct astnode_boolean _boolean_false = {
   .boolval = false
 };
 
+struct astnode_pair _empty_list = {
+  .type = TYPE_PAIR,
+  .car = NULL,
+  .cdr = NULL
+};
+
 bool is_empty_list(struct astnode *node)
 {
   return node != NULL && node->type == TYPE_PAIR &&

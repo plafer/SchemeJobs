@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -34,6 +35,7 @@ int alloc_astnode(astnode_type type, struct astnode **ret)
 
   NULL_CHECK1(ret);
 
+  assert(type < TYPE_MAX);
   switch (type)
     {
     case TYPE_SYM:
@@ -57,6 +59,9 @@ int alloc_astnode(astnode_type type, struct astnode **ret)
     case TYPE_PRMTPROC:
       new_node = malloc(sizeof(struct astnode_prmtproc));
       break;
+    case TYPE_MAX:
+      // Compiler happy
+      return EINVAL;
     }
 
   if (new_node == NULL)

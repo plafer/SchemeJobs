@@ -16,6 +16,7 @@ typedef enum {
   TYPE_ENV,
   TYPE_KEYWORD,
   TYPE_PRMTPROC,
+  TYPE_MAX,
 } astnode_type;
 
 struct astnode {
@@ -55,6 +56,10 @@ struct astnode_pair {
   struct astnode *car;
   struct astnode *cdr;
 };
+
+extern struct astnode_pair _empty_list;
+
+#define EMPTY_LIST &_empty_list
 
 // Example bindings: ((+ <proc>) (var <int>) ...)
 struct astnode_env {

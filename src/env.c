@@ -103,6 +103,8 @@ int make_top_level_env(struct astnode_env **ret)
   RETONERR(make_empty_env(ret));
   RETONERR(install_pair_ops(*ret));
 
+  // TODO: Install more keywords/primitive procedures
+
   return 0;
 }
 

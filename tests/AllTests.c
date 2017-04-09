@@ -5,6 +5,8 @@
 CuSuite* SymbolsGetSuite();
 CuSuite* EnvGetSuite();
 CuSuite* PrmtGetSuite();
+CuSuite* EvalGetSuite();
+
 
 // Note: CuSuite runs all the tests in the same process (i.e. changes made in
 // one test are still there in all other tests that run after).
@@ -16,6 +18,8 @@ void RunAllTests(void)
 	CuSuiteAddSuite(suite, SymbolsGetSuite());
 	CuSuiteAddSuite(suite, EnvGetSuite());
 	CuSuiteAddSuite(suite, PrmtGetSuite());
+	CuSuiteAddSuite(suite, EvalGetSuite());
+
 
 	CuSuiteRun(suite);
 	CuSuiteSummary(suite, output);

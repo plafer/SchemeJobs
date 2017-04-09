@@ -7,15 +7,7 @@
 #include "inc/env.h"
 #include "inc/symbols.h"
 
-struct astnode_env *top_level_env;
-
-static const struct astnode_pair _empty_list = {
-  .type = TYPE_PAIR,
-  .car = NULL,
-  .cdr = NULL
-};
-
-#define EMPTY_LIST (struct astnode *) &_empty_list
+static struct astnode_env *top_level_env;
 
 // This test MUST run first. Since the CuTest doesn't clean up between tests, we
 // will call make_top_level_env once in this test, and save a pointer to it for
@@ -131,14 +123,14 @@ void TestExtendEnv_LookupParam(CuTest *tc) {
   formal_params.car = malloc(sizeof(struct astnode_sym));
   formal_params.car->type = TYPE_SYM;
   ((struct astnode_sym *)formal_params.car)->symi = sym_node.symi;
-  formal_params.cdr = EMPTY_LIST;
+  formal_params.cdr = (struct astnode *) EMPTY_LIST;
 
   // Prepare argument list
   args.type = TYPE_PAIR;
   args.car = malloc(sizeof(struct astnode_int));
   args.car->type = TYPE_INT;
   ((struct astnode_int *)args.car)->intval = BINDING_VAL;
-  args.cdr = EMPTY_LIST;
+  args.cdr = (struct astnode *) EMPTY_LIST;
 
   // Extend env
   err = extend_env(top_level_env,&formal_params, &args, &extended_env);
@@ -162,10 +154,10 @@ void TestExtendEnv_DefineLocalBinding(CuTest *tc) {
   struct astnode_int *ret;
 
   // Prepare formal parameters list
-  formal_params = (struct astnode_pair *)  EMPTY_LIST;
+  formal_params = EMPTY_LIST;
 
   // Prepare argument list
-  args = (struct astnode_pair *) EMPTY_LIST;
+  args = EMPTY_LIST;
 
   // Extend env
   err = extend_env(top_level_env, formal_params, args, &extended_env);
@@ -209,5 +201,3 @@ CuSuite* EnvGetSuite() {
 
   return suite;
 }
-
-#undef EMPTY_LIST
