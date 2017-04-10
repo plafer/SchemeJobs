@@ -120,6 +120,65 @@ void TestEval_PairPrmt(CuTest *tc) {
   CuAssertIntEquals(tc, VAL2, ((struct astnode_int *) ret->cdr)->intval);
 }
 
+void TestEval_PairCompproc(CuTest *tc) {
+  // (define (fn a) a)
+  int err;
+  char *sym;
+  struct astnode_sym sym_define;
+  struct astnode_sym sym_func;
+  struct astnode_sym sym_a;
+  struct astnode *ret;
+
+  struct astnode_pair third_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair binding_arg = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair binding_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_func,
+    .cdr = (struct astnode *) &binding_arg
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &binding_pair,
+    .cdr = (struct astnode *) &third_pair
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_define,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  sym = "define";
+  sym_define.type = TYPE_SYM;
+  err = putsym(sym, sym + strlen(sym) - 1, &sym_define.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  sym = "func";
+  sym_func.type = TYPE_SYM;
+  err = putsym(sym, sym + strlen(sym) - 1, &sym_func.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  sym = "a";
+  sym_a.type = TYPE_SYM;
+  err = putsym(sym, sym + strlen(sym) - 1, &sym_a.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  err = eval((struct astnode *) &first_pair, env, &ret);
+  CuAssertIntEquals(tc, 0, err);
+
+  // The return value of define is undefined; instead we lookup the environment
+  err = lookup_env(env, &sym_func, &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_COMPPROC, ret->type);
+}
+
 void TestEval_Env(CuTest *tc) {
   int err;
   struct astnode_env *ret;
@@ -217,14 +276,13 @@ void TestApply_NullArg(CuTest *tc) {
 CuSuite* EvalGetSuite() {
   CuSuite* suite = CuSuiteNew();
 
-  // TODO: Add test that applies a keyword handler (e.g. define)
-
   SUITE_ADD_TEST(suite, TestEval_InitEnv);
   SUITE_ADD_TEST(suite, TestEval_NullArg);
   SUITE_ADD_TEST(suite, TestEval_Int);
   SUITE_ADD_TEST(suite, TestEval_Sym);
   SUITE_ADD_TEST(suite, TestEval_Boolean);
   SUITE_ADD_TEST(suite, TestEval_PairPrmt);
+  SUITE_ADD_TEST(suite, TestEval_PairCompproc);
   SUITE_ADD_TEST(suite, TestEval_Env);
   SUITE_ADD_TEST(suite, TestEval_Keyword);
   SUITE_ADD_TEST(suite, TestEval_Prmtproc);

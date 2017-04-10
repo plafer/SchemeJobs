@@ -7,7 +7,7 @@
 #include "inc/env.h"
 #include "inc/symbols.h"
 
-static struct astnode_env *top_level_env;
+struct astnode_env *top_level_env;
 
 // This test MUST run first. Since the CuTest doesn't clean up between tests, we
 // will call make_top_level_env once in this test, and save a pointer to it for

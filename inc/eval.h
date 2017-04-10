@@ -13,7 +13,14 @@
 // + ENOMEM: Out of memory.
 int eval(struct astnode *node, struct astnode_env *env, struct astnode **ret);
 
-// Convienience procedure that evaluates each element in `stmts` and returns the
+// Evaluate each element in `unevaled_args` and placed a list of the evaluated
+// arguments in `ret`.
+// Possible errors:
+// See eval.
+int eval_list(struct astnode_pair *unevaled_args, struct astnode_env *env,
+	      struct astnode_pair **ret);
+
+// Convenience procedure that evaluates each element in `stmts` and returns the
 // value of the last one. Return value is unspecified if `stmts` is the empty
 // list.
 // Possible errors:

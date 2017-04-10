@@ -11,7 +11,7 @@
 
 // Takes a list of objects to evaluate and returns a list of the corresponding
 // objects evaluated.
-static int eval_list(struct astnode_pair *unevaled_args, struct astnode_env *env,
+int eval_list(struct astnode_pair *unevaled_args, struct astnode_env *env,
 		     struct astnode_pair **ret)
 {
   struct astnode_pair *evaled_args;
@@ -68,13 +68,14 @@ static int eval_pair(struct astnode_pair *node, struct astnode_env *env,
 
   if (evaled_car->type == TYPE_KEYWORD)
     {
-      struct astnode_pair *evaled_args;
+      struct astnode_pair *args;
       struct astnode_keyword *keyword;
 
-      RETONERR(eval_list((struct astnode_pair *) node->cdr, env, &evaled_args));
-
+      TYPE_CHECK(node->cdr, TYPE_PAIR);
+      args = (struct astnode_pair *) node->cdr;
       keyword = (struct astnode_keyword *) evaled_car;
-      RETONERR(keyword->handler(evaled_args, env, ret));
+
+      RETONERR(keyword->handler(args, env, ret));
     }
   else
     {

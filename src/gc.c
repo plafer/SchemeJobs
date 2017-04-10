@@ -61,6 +61,7 @@ int alloc_astnode(astnode_type type, struct astnode **ret)
       break;
     case TYPE_COMPPROC:
       new_node = malloc(sizeof(struct astnode_compproc));
+      break;
     case TYPE_MAX:
       // Compiler happy
       return EINVAL;

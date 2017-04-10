@@ -5,6 +5,7 @@
 #include "inc/ast.h"
 #include "inc/gc.h"
 #include "inc/env.h"
+#include "inc/kw_handlers.h"
 #include "inc/prmt_handlers.h"
 #include "inc/stdmacros.h"
 #include "inc/symbols.h"
@@ -34,11 +35,37 @@ static int bind_rawsym_prmt(struct astnode_env *env, char *rawsym, prmt_handler 
   return 0;
 }
 
+static int bind_rawsym_kw(struct astnode_env *env, char *rawsym, kw_handler hdl)
+{
+  struct astnode_sym *symnode;
+  struct astnode_keyword *hdlnode;
+
+  // Add symbol to symbol table
+  RETONERR(alloc_astnode(TYPE_SYM, (struct astnode **) &symnode));
+  RETONERR(putsym(rawsym, rawsym + strlen(rawsym) - 1, &symnode->symi));
+
+  // Wrap primitive handler in astnode
+  RETONERR(alloc_astnode(TYPE_KEYWORD, (struct astnode **) &hdlnode));
+  hdlnode->handler = hdl;
+
+  // Bind symbol in environment
+  RETONERR(define_binding(env, symnode, (struct astnode *) hdlnode));
+
+  return 0;
+}
+
 static int install_pair_ops(struct astnode_env *env)
 {
   RETONERR(bind_rawsym_prmt(env, "cons", prmt_cons));
   RETONERR(bind_rawsym_prmt(env, "car", prmt_car));
   RETONERR(bind_rawsym_prmt(env, "cdr", prmt_cdr));
+
+  return 0;
+}
+
+static int install_keywords(struct astnode_env *env)
+{
+  RETONERR(bind_rawsym_kw(env, "define", kw_define));
 
   return 0;
 }
@@ -102,8 +129,7 @@ int make_top_level_env(struct astnode_env **ret)
 {
   RETONERR(make_empty_env(ret));
   RETONERR(install_pair_ops(*ret));
-
-  // TODO: Install more keywords/primitive procedures
+  RETONERR(install_keywords(*ret));
 
   return 0;
 }
