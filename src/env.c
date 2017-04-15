@@ -66,7 +66,8 @@ static int install_pair_ops(struct astnode_env *env)
 static int install_keywords(struct astnode_env *env)
 {
   RETONERR(bind_rawsym_kw(env, "define", kw_define));
-  // TODO: Add lambda and `if`
+  RETONERR(bind_rawsym_kw(env, "if", kw_if));
+  // TODO: Add lambda and quote
 
   return 0;
 }

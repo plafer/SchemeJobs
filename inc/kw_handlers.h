@@ -13,4 +13,7 @@
 int kw_define(struct astnode_pair *args, struct astnode_env *env,
 	      struct astnode **ret);
 
+int kw_if(struct astnode_pair *args, struct astnode_env *env,
+	  struct astnode **ret);
+
 #endif

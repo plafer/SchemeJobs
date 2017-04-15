@@ -61,3 +61,46 @@ int kw_define(struct astnode_pair *args, struct astnode_env *env,
 
   return 0;
 }
+
+int kw_if(struct astnode_pair *args, struct astnode_env *env,
+	  struct astnode **ret)
+{
+  struct astnode *cond;
+  struct astnode *truepath;
+  struct astnode *falsepath;
+  struct astnode *evaled_cond;
+
+  NULL_CHECK3(args, env, ret);
+
+  if (is_empty_list((struct astnode *)args))
+    return EBADMSG;
+
+  cond = args->car;
+
+  args = (struct astnode_pair *)args->cdr;
+  TYPE_CHECK(args, TYPE_PAIR);
+  truepath = args->car;
+
+  args = (struct astnode_pair *)args->cdr;
+  TYPE_CHECK(args, TYPE_PAIR);
+  falsepath = args->car;
+
+  if (!is_empty_list(args->cdr))
+    return EBADMSG;
+
+  // If we got here, arguments are valid
+  RETONERR(eval(cond, env, &evaled_cond));
+
+  // Only boolean false will have the false path evaled
+  if (evaled_cond->type == TYPE_BOOLEAN &&
+      ((struct astnode_boolean *)evaled_cond)->boolval == false)
+    {
+      RETONERR(eval(falsepath, env, ret));
+    }
+  else
+    {
+      RETONERR(eval(truepath, env, ret));
+    }
+
+  return 0;
+}

@@ -14,14 +14,14 @@ OBJ_FILES := $(patsubst %.c,%.o,$(SRC_FILES))
 OBJ_FILES := $(subst $(SRCDIR)/,$(OBJDIR)/,$(OBJ_FILES))
 
 ## Test suite provides its own main(), so we filter ours out.
-OBJ_FILES_TEST := $(filter-out obj/main.o, $(OBJ_FILES))
+OBJ_FILES_TEST := $(filter-out obj/main.o obj/lex.yy.o obj/parser.tab.o, $(OBJ_FILES))
 
-CFLAGS := -Wall -Wextra -I. -lfl
+CFLAGS := -Wall -Wextra -I.
 CFLAGS_DEBUG := $(CFLAGS) -gstabs
 CFLAGS_PROD := $(CFLAGS) -O3 -Werror
 
 $(OUT_BIN_NAME): $(OBJ_FILES) $(INC_FILES)
-	$(CC) -o $@ $(OBJ_FILES) $(CFLAGS_PROD)
+	$(CC) -o $@ $(OBJ_FILES) $(CFLAGS_PROD) -lfl
 
 debug: TAGS $(OBJ_FILES) $(INC_FILES)
 	$(CC) -o $(OUT_BIN_NAME) $(OBJ_FILES) $(CFLAGS_DEBUG)
