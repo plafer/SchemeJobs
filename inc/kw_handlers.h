@@ -17,6 +17,9 @@ int kw_if(struct astnode_pair *args, struct astnode_env *env,
 	  struct astnode **ret);
 
 int kw_quote(struct astnode_pair *args, struct astnode_env *env,
-	  struct astnode **ret);
+	     struct astnode **ret);
+
+int kw_lambda(struct astnode_pair *args, struct astnode_env *env,
+	      struct astnode **ret);
 
 #endif

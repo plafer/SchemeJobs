@@ -117,3 +117,27 @@ int kw_quote(struct astnode_pair *args, struct astnode_env *env,
 
   return 0;
 }
+
+int kw_lambda(struct astnode_pair *args, struct astnode_env *env,
+	      struct astnode **ret)
+{
+  struct astnode_pair *params;
+  struct astnode_pair *body;
+
+  NULL_CHECK3(args, env, ret);
+
+  TYPE_CHECK(args->car, TYPE_PAIR);
+  params = (struct astnode_pair *) args->car;
+
+  TYPE_CHECK(args->cdr, TYPE_PAIR);
+  if (is_empty_list(args->cdr))
+    return EBADMSG;
+  body = (struct astnode_pair *) args->cdr;
+
+  RETONERR(alloc_astnode(TYPE_COMPPROC, ret));
+  ((struct astnode_compproc *) *ret)->body = body;
+  ((struct astnode_compproc *) *ret)->env = env;
+  ((struct astnode_compproc *) *ret)->params = params;
+
+  return 0;
+}

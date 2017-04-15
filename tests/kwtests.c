@@ -321,6 +321,94 @@ void TestQuote_TooManyArgs(CuTest *tc)
   CuAssertIntEquals(tc, EBADMSG, err);
 }
 
+void TestLambda_NullArgs(CuTest *tc) {
+  int err;
+
+  err = kw_if(NULL, NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestLambda_ValidObj(CuTest *tc) {
+  int err;
+  char *sym;
+  struct astnode_sym sym_a_node;
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a_node,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair binding_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a_node,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &binding_pair,
+    .cdr = (struct astnode *) &sec_pair
+  };
+  struct astnode_compproc *ret;
+
+  sym = "a";
+  sym_a_node.type = TYPE_SYM;
+  err = putsym(sym, sym, &sym_a_node.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  err = kw_lambda(&first_pair, top_level_env, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_COMPPROC, ret->type);
+}
+
+void TestLambda_NoArgs(CuTest *tc) {
+  int err;
+  char *sym;
+  struct astnode_sym sym_a_node;
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a_node,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) EMPTY_LIST,
+    .cdr = (struct astnode *) &sec_pair
+  };
+  struct astnode_compproc *ret;
+
+  sym = "a";
+  sym_a_node.type = TYPE_SYM;
+  err = putsym(sym, sym, &sym_a_node.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  err = kw_lambda(&first_pair, top_level_env, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_COMPPROC, ret->type);
+}
+
+void TestLambda_TooFewArgs(CuTest *tc) {
+  int err;
+  char *sym;
+  struct astnode_sym sym_a_node;
+  struct astnode_pair binding_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_a_node,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &binding_pair,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_compproc *ret;
+
+  sym = "a";
+  sym_a_node.type = TYPE_SYM;
+  err = putsym(sym, sym, &sym_a_node.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  err = kw_lambda(&first_pair, top_level_env, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
 
 CuSuite* KwGetSuite() {
   CuSuite* suite = CuSuiteNew();
@@ -337,6 +425,10 @@ CuSuite* KwGetSuite() {
   SUITE_ADD_TEST(suite, TestQuote_ValidObj);
   SUITE_ADD_TEST(suite, TestQuote_TooFewArgs);
   SUITE_ADD_TEST(suite, TestQuote_TooManyArgs);
+  SUITE_ADD_TEST(suite, TestLambda_NullArgs);
+  SUITE_ADD_TEST(suite, TestLambda_ValidObj);
+  SUITE_ADD_TEST(suite, TestLambda_NoArgs);
+  SUITE_ADD_TEST(suite, TestLambda_TooFewArgs);
 
   return suite;
 }
