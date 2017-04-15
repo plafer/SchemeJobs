@@ -282,7 +282,7 @@ void TestIsPair_NoArgs(CuTest *tc) {
   struct astnode_boolean *ret;
 
   arglist = EMPTY_LIST;
-  err = prmt_is_pair(arglist, &ret);
+  err = prmt_is_pair(arglist, (struct astnode **) &ret);
   CuAssertIntEquals(tc, EBADMSG, err);
 }
 
@@ -304,7 +304,7 @@ void TestIsPair_ValidObj(CuTest *tc) {
   dummy.type = TYPE_INT;
   dummy.intval = 3;
 
-  err = prmt_is_pair(&arglist, &ret);
+  err = prmt_is_pair(&arglist, (struct astnode **)&ret);
   CuAssertIntEquals(tc, 0, err);
   CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
   CuAssertIntEquals(tc, 1, (int) ret->boolval);
@@ -320,7 +320,7 @@ void TestIsPair_EmptyList(CuTest *tc) {
   arglist.car = (struct astnode *) EMPTY_LIST;
   arglist.cdr = (struct astnode *) EMPTY_LIST;
 
-  err = prmt_is_pair(&arglist, &ret);
+  err = prmt_is_pair(&arglist, (struct astnode **)&ret);
   CuAssertIntEquals(tc, 0, err);
   CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
   CuAssertIntEquals(tc, 0, (int) ret->boolval);
@@ -339,7 +339,7 @@ void TestIsPair_InvalidObj(CuTest *tc) {
   obj.type = TYPE_INT;
   obj.intval = 3;
 
-  err = prmt_is_pair(&arglist, &ret);
+  err = prmt_is_pair(&arglist, (struct astnode **)&ret);
   CuAssertIntEquals(tc, 0, err);
   CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
   CuAssertIntEquals(tc, 0, (int) ret->boolval);
@@ -369,10 +369,140 @@ void TestIsPair_TooManyArgs(CuTest *tc) {
   sec_pair.car = (struct astnode *) &num2;
   sec_pair.cdr = (struct astnode *) EMPTY_LIST;
 
-  err = prmt_is_pair(&first_pair,  &ret);
+  err = prmt_is_pair(&first_pair,  (struct astnode **)&ret);
   CuAssertIntEquals(tc, EBADMSG, err);
 }
 
+void TestPlus_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_plus(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestPlus_ValidObj(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_plus(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, VAL1 + VAL1, ret->intval);
+}
+
+void TestPlus_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_int *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_plus(first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, 0, ret->intval);
+}
+
+void TestPlus_WrongType(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_plus(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestMinus_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_minus(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestMinus_ValidObj(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_minus(&first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, VAL1 - VAL1, ret->intval);
+}
+
+void TestMinus_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_int *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_minus(first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestMinus_OneArg(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+
+  err = prmt_minus(&first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, -VAL1, ret->intval);
+}
 
 CuSuite* PrmtGetSuite() {
   CuSuite* suite = CuSuiteNew();
@@ -396,6 +526,14 @@ CuSuite* PrmtGetSuite() {
   SUITE_ADD_TEST(suite, TestIsPair_EmptyList);
   SUITE_ADD_TEST(suite, TestIsPair_InvalidObj);
   SUITE_ADD_TEST(suite, TestIsPair_TooManyArgs);
+  SUITE_ADD_TEST(suite, TestPlus_NullArgs);
+  SUITE_ADD_TEST(suite, TestPlus_ValidObj);
+  SUITE_ADD_TEST(suite, TestPlus_NoArgs);
+  SUITE_ADD_TEST(suite, TestPlus_WrongType);
+  SUITE_ADD_TEST(suite, TestMinus_NullArgs);
+  SUITE_ADD_TEST(suite, TestMinus_ValidObj);
+  SUITE_ADD_TEST(suite, TestMinus_NoArgs);
+  SUITE_ADD_TEST(suite, TestMinus_OneArg);
 
   return suite;
 }

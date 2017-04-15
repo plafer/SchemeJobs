@@ -77,7 +77,7 @@ int prmt_cdr(struct astnode_pair *args, struct astnode **ret)
   return 0;
 }
 
-int prmt_is_pair(struct astnode_pair *args, struct astnode_boolean **ret)
+int prmt_is_pair(struct astnode_pair *args, struct astnode **ret)
 {
   struct astnode *obj;
 
@@ -96,11 +96,72 @@ int prmt_is_pair(struct astnode_pair *args, struct astnode_boolean **ret)
   // We is_empty_list first, without assuming that its type is also pair
   // (implementation might change later).
   if (is_empty_list(obj))
-    *ret = BOOLEAN_FALSE;
+    *ret = (struct astnode *) BOOLEAN_FALSE;
   else if (obj->type == TYPE_PAIR)
-    *ret = BOOLEAN_TRUE;
+    *ret = (struct astnode *) BOOLEAN_TRUE;
   else
-    *ret = BOOLEAN_FALSE;
+    *ret = (struct astnode *) BOOLEAN_FALSE;
+
+  return 0;
+}
+
+int prmt_plus(struct astnode_pair *args, struct astnode **ret)
+{
+  struct astnode_int *sum;
+
+  NULL_CHECK2(args, ret);
+
+  RETONERR(alloc_astnode(TYPE_INT, (struct astnode **)&sum));
+
+  for (sum->intval = 0;
+       !is_empty_list((struct astnode *) args);
+       args = (struct astnode_pair *) args->cdr)
+    {
+      TYPE_CHECK(args, TYPE_PAIR);
+      TYPE_CHECK(args->car, TYPE_INT);
+
+      sum->intval += ((struct astnode_int *)args->car)->intval;
+    }
+
+  *ret = (struct astnode *) sum;
+
+  return 0;
+}
+
+int prmt_minus(struct astnode_pair *args, struct astnode **ret)
+{
+  int32_t initval;
+  struct astnode_int *sum;
+
+  NULL_CHECK2(args, ret);
+
+  TYPE_CHECK(args->car, TYPE_INT);
+  initval = ((struct astnode_int *)args->car)->intval;
+  args = (struct astnode_pair *)args->cdr;
+
+  RETONERR(alloc_astnode(TYPE_INT, (struct astnode **)&sum));
+
+  if (is_empty_list((struct astnode *)args))
+    {
+      // If we only have one argument, the result is the negative of the
+      // argument
+      sum->intval = -initval;
+      *ret = (struct astnode *) sum;
+      return 0;
+    }
+
+
+  for (sum->intval = initval;
+       !is_empty_list((struct astnode *) args);
+       args = (struct astnode_pair *) args->cdr)
+    {
+      TYPE_CHECK(args, TYPE_PAIR);
+      TYPE_CHECK(args->car, TYPE_INT);
+
+      sum->intval -= ((struct astnode_int *)args->car)->intval;
+    }
+
+  *ret = (struct astnode *) sum;
 
   return 0;
 }

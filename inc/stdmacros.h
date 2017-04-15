@@ -27,11 +27,12 @@
     return EINVAL
 
 #define TYPE_CHECK(astnode, type_req)		\
-  if ((astnode)->type != (type_req))		\
+  if ((astnode == NULL) || (astnode)->type != (type_req))		\
     return EBADMSG
 
 #define TYPE_CHECK2(astnode, type1, type2)				\
-  if ((astnode)->type != (type1) && (astnode)->type != (type2))		\
+  if ((astnode == NULL) ||						\
+      ((astnode)->type != (type1) && (astnode)->type != (type2)))	\
     return EBADMSG
 
 

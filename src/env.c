@@ -54,11 +54,15 @@ static int bind_rawsym_kw(struct astnode_env *env, char *rawsym, kw_handler hdl)
   return 0;
 }
 
-static int install_pair_ops(struct astnode_env *env)
+static int install_prmt_ops(struct astnode_env *env)
 {
   RETONERR(bind_rawsym_prmt(env, "cons", prmt_cons));
   RETONERR(bind_rawsym_prmt(env, "car", prmt_car));
   RETONERR(bind_rawsym_prmt(env, "cdr", prmt_cdr));
+  RETONERR(bind_rawsym_prmt(env, "pair?", prmt_is_pair));
+
+  RETONERR(bind_rawsym_prmt(env, "+", prmt_plus));
+  RETONERR(bind_rawsym_prmt(env, "-", prmt_minus));
 
   return 0;
 }
@@ -131,7 +135,7 @@ static int make_empty_env(struct astnode_env **ret)
 int make_top_level_env(struct astnode_env **ret)
 {
   RETONERR(make_empty_env(ret));
-  RETONERR(install_pair_ops(*ret));
+  RETONERR(install_prmt_ops(*ret));
   RETONERR(install_keywords(*ret));
 
   return 0;

@@ -26,6 +26,9 @@ int prmt_cdr(struct astnode_pair *args, struct astnode **ret);
 // Possible errors:
 // + EINVAL: Either argument is NULL.
 // + EBADMSG: Wrong number or type of arguments.
-int prmt_is_pair(struct astnode_pair *args, struct astnode_boolean **ret);
+int prmt_is_pair(struct astnode_pair *args, struct astnode **ret);
+
+int prmt_plus(struct astnode_pair *args, struct astnode **ret);
+int prmt_minus(struct astnode_pair *args, struct astnode **ret);
 
 #endif
