@@ -224,3 +224,42 @@ int prmt_div(struct astnode_pair *args, struct astnode **ret)
 
   return 0;
 }
+
+int prmt_equal(struct astnode_pair *args, struct astnode **ret)
+{
+  int firstval;
+  struct astnode_boolean *result;
+  bool isfirst = true;
+
+  NULL_CHECK2(args, ret);
+
+  RETONERR(alloc_astnode(TYPE_BOOLEAN, (struct astnode **)&result));
+
+
+
+  for (result->boolval = true;
+       !is_empty_list((struct astnode *) args);
+       args = (struct astnode_pair *) args->cdr)
+    {
+      TYPE_CHECK(args, TYPE_PAIR);
+      TYPE_CHECK(args->car, TYPE_INT);
+
+      if (isfirst)
+	{
+	  firstval = ((struct astnode_int *)args->car)->intval;
+	  isfirst = false;
+	}
+      else
+	{
+	  if (((struct astnode_int *)args->car)->intval != firstval)
+	    {
+	      result->boolval = false;
+	      break;
+	    }
+	}
+    }
+
+  *ret = (struct astnode *) result;
+
+  return 0;
+}

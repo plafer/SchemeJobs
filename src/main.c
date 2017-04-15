@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include "inc/ast.h"
 #include "inc/env.h"
@@ -117,7 +118,12 @@ int main()
 	  continue;
 	}
       if ((err = eval(parsed_exp, env, &evaled_exp)) != 0)
-	printf("Error in evaluating expression: %d", err);
+	{
+	  if (err == EBADMSG)
+	    printf("Invalid input.");
+	  else
+	    printf("Error in evaluating expression: %d", err);
+	}
       else
 	print_exp(evaled_exp);
       printf("\n");

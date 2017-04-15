@@ -660,6 +660,104 @@ void TestDiv_OneArg(CuTest *tc) {
   CuAssertIntEquals(tc, 1 / VAL1, ret->intval);
 }
 
+void TestEqual_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_equal(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestEqual_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_boolean *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_equal(first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
+  CuAssertIntEquals(tc, 1, (int) ret->boolval);
+}
+
+void TestEqual_ValidObjTrue(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_boolean *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_equal(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
+  CuAssertIntEquals(tc, 1, (int) ret->boolval);
+}
+
+void TestEqual_ValidObjFalse(CuTest *tc) {
+  const int VAL1 = 3;
+  const int VAL2 = 42;
+  int err;
+  struct astnode_boolean *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_int num2 = {
+    .type = TYPE_INT,
+    .intval = VAL2
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num2,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_equal(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
+  CuAssertIntEquals(tc, 0, (int) ret->boolval);
+}
+
+void TestEqual_WrongType(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_boolean *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_equal(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
 
 CuSuite* PrmtGetSuite() {
   CuSuite* suite = CuSuiteNew();
@@ -700,6 +798,11 @@ CuSuite* PrmtGetSuite() {
   SUITE_ADD_TEST(suite, TestDiv_NoArgs);
   SUITE_ADD_TEST(suite, TestDiv_ValidObj);
   SUITE_ADD_TEST(suite, TestDiv_OneArg);
+  SUITE_ADD_TEST(suite, TestEqual_NullArgs);
+  SUITE_ADD_TEST(suite, TestEqual_NoArgs);
+  SUITE_ADD_TEST(suite, TestEqual_ValidObjTrue);
+  SUITE_ADD_TEST(suite, TestEqual_ValidObjFalse);
+  SUITE_ADD_TEST(suite, TestEqual_WrongType);
 
   return suite;
 }

@@ -65,6 +65,7 @@ static int install_prmt_ops(struct astnode_env *env)
   RETONERR(bind_rawsym_prmt(env, "-", prmt_minus));
   RETONERR(bind_rawsym_prmt(env, "*", prmt_mult));
   RETONERR(bind_rawsym_prmt(env, "/", prmt_div));
+  RETONERR(bind_rawsym_prmt(env, "=", prmt_equal));
 
   return 0;
 }
