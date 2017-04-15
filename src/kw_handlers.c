@@ -104,3 +104,16 @@ int kw_if(struct astnode_pair *args, struct astnode_env *env,
 
   return 0;
 }
+
+int kw_quote(struct astnode_pair *args, struct astnode_env *env,
+	     struct astnode **ret)
+{
+  NULL_CHECK3(args, env, ret);
+
+  if (is_empty_list((struct astnode *)args) || !is_empty_list(args->cdr))
+    return EBADMSG;
+
+  *ret = args->car;
+
+  return 0;
+}

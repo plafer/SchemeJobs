@@ -259,6 +259,68 @@ void TestIf_TooManyArgs(CuTest *tc)
   CuAssertIntEquals(tc, EBADMSG, err);
 }
 
+void TestQuote_NullArgs(CuTest *tc) {
+  int err;
+
+  err = kw_quote(NULL, NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestQuote_ValidObj(CuTest *tc) {
+  int err;
+  struct astnode_sym sym_node;
+  struct astnode_sym *ret;
+
+  char *sym = "potato";
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &sym_node,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+
+  sym_node.type = TYPE_SYM;
+  err = putsym(sym, sym + strlen(sym) - 1, &sym_node.symi);
+  CuAssertIntEquals(tc, 0, err);
+
+  err = kw_quote(&first_pair, top_level_env, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_SYM, ret->type);
+  CuAssertPtrEquals(tc, sym_node.symi, ret->symi);
+}
+
+void TestQuote_TooFewArgs(CuTest *tc)
+{
+  int err;
+  struct astnode *ret;
+
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = kw_quote(first_pair, top_level_env, &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+
+}
+
+void TestQuote_TooManyArgs(CuTest *tc)
+{
+  int err;
+  struct astnode *ret;
+
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+
+  err = kw_quote(&first_pair, top_level_env, &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
 
 CuSuite* KwGetSuite() {
   CuSuite* suite = CuSuiteNew();
@@ -271,7 +333,10 @@ CuSuite* KwGetSuite() {
   SUITE_ADD_TEST(suite, TestIf_NormalBindingFalsePath);
   SUITE_ADD_TEST(suite, TestIf_TooFewArgs);
   SUITE_ADD_TEST(suite, TestIf_TooManyArgs);
-
+  SUITE_ADD_TEST(suite, TestQuote_NullArgs);
+  SUITE_ADD_TEST(suite, TestQuote_ValidObj);
+  SUITE_ADD_TEST(suite, TestQuote_TooFewArgs);
+  SUITE_ADD_TEST(suite, TestQuote_TooManyArgs);
 
   return suite;
 }

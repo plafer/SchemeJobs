@@ -16,4 +16,7 @@ int kw_define(struct astnode_pair *args, struct astnode_env *env,
 int kw_if(struct astnode_pair *args, struct astnode_env *env,
 	  struct astnode **ret);
 
+int kw_quote(struct astnode_pair *args, struct astnode_env *env,
+	  struct astnode **ret);
+
 #endif
