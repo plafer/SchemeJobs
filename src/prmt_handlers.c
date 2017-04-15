@@ -150,7 +150,6 @@ int prmt_minus(struct astnode_pair *args, struct astnode **ret)
       return 0;
     }
 
-
   for (sum->intval = initval;
        !is_empty_list((struct astnode *) args);
        args = (struct astnode_pair *) args->cdr)
@@ -159,6 +158,66 @@ int prmt_minus(struct astnode_pair *args, struct astnode **ret)
       TYPE_CHECK(args->car, TYPE_INT);
 
       sum->intval -= ((struct astnode_int *)args->car)->intval;
+    }
+
+  *ret = (struct astnode *) sum;
+
+  return 0;
+}
+
+int prmt_mult(struct astnode_pair *args, struct astnode **ret)
+{
+  struct astnode_int *product;
+
+  NULL_CHECK2(args, ret);
+
+  RETONERR(alloc_astnode(TYPE_INT, (struct astnode **)&product));
+
+  for (product->intval = 1;
+       !is_empty_list((struct astnode *) args);
+       args = (struct astnode_pair *) args->cdr)
+    {
+      TYPE_CHECK(args, TYPE_PAIR);
+      TYPE_CHECK(args->car, TYPE_INT);
+
+      product->intval *= ((struct astnode_int *)args->car)->intval;
+    }
+
+  *ret = (struct astnode *) product;
+
+  return 0;
+}
+
+int prmt_div(struct astnode_pair *args, struct astnode **ret)
+{
+  int32_t initval;
+  struct astnode_int *sum;
+
+  NULL_CHECK2(args, ret);
+
+  TYPE_CHECK(args->car, TYPE_INT);
+  initval = ((struct astnode_int *)args->car)->intval;
+  args = (struct astnode_pair *)args->cdr;
+
+  RETONERR(alloc_astnode(TYPE_INT, (struct astnode **)&sum));
+
+  if (is_empty_list((struct astnode *)args))
+    {
+      // If we only have one argument, the result is the quotient of 1 and the
+      // argument.
+      sum->intval = 1 / initval;
+      *ret = (struct astnode *) sum;
+      return 0;
+    }
+
+  for (sum->intval = initval;
+       !is_empty_list((struct astnode *) args);
+       args = (struct astnode_pair *) args->cdr)
+    {
+      TYPE_CHECK(args, TYPE_PAIR);
+      TYPE_CHECK(args->car, TYPE_INT);
+
+      sum->intval /= ((struct astnode_int *)args->car)->intval;
     }
 
   *ret = (struct astnode *) sum;

@@ -504,6 +504,163 @@ void TestMinus_OneArg(CuTest *tc) {
   CuAssertIntEquals(tc, -VAL1, ret->intval);
 }
 
+void TestMinus_WrongType(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_minus(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+
+void TestMult_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_mult(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestMult_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_int *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_mult(first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, 1, ret->intval);
+}
+
+void TestMult_ValidObj(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_mult(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, VAL1 * VAL1, ret->intval);
+}
+
+void TestMult_WrongType(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_mult(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestDiv_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_div(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestDiv_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_int *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_div(first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestDiv_ValidObj(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_div(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, VAL1 / VAL1, ret->intval);
+}
+
+void TestDiv_OneArg(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+
+  err = prmt_div(&first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_INT, ret->type);
+  CuAssertIntEquals(tc, 1 / VAL1, ret->intval);
+}
+
+
 CuSuite* PrmtGetSuite() {
   CuSuite* suite = CuSuiteNew();
 
@@ -534,6 +691,15 @@ CuSuite* PrmtGetSuite() {
   SUITE_ADD_TEST(suite, TestMinus_ValidObj);
   SUITE_ADD_TEST(suite, TestMinus_NoArgs);
   SUITE_ADD_TEST(suite, TestMinus_OneArg);
+  SUITE_ADD_TEST(suite, TestMinus_WrongType);
+  SUITE_ADD_TEST(suite, TestMult_NullArgs);
+  SUITE_ADD_TEST(suite, TestMult_NoArgs);
+  SUITE_ADD_TEST(suite, TestMult_ValidObj);
+  SUITE_ADD_TEST(suite, TestMult_WrongType);
+  SUITE_ADD_TEST(suite, TestDiv_NullArgs);
+  SUITE_ADD_TEST(suite, TestDiv_NoArgs);
+  SUITE_ADD_TEST(suite, TestDiv_ValidObj);
+  SUITE_ADD_TEST(suite, TestDiv_OneArg);
 
   return suite;
 }

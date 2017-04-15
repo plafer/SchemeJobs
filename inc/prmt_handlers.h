@@ -30,5 +30,7 @@ int prmt_is_pair(struct astnode_pair *args, struct astnode **ret);
 
 int prmt_plus(struct astnode_pair *args, struct astnode **ret);
 int prmt_minus(struct astnode_pair *args, struct astnode **ret);
+int prmt_mult(struct astnode_pair *args, struct astnode **ret);
+int prmt_div(struct astnode_pair *args, struct astnode **ret);
 
 #endif
