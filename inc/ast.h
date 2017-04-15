@@ -9,7 +9,7 @@
 // No strings for now.
 // Only one type of number for now: 32 bit signed int.
 typedef enum {
-  TYPE_SYM,
+  TYPE_SYM = 0,
   TYPE_INT,
   TYPE_BOOLEAN,
   TYPE_PAIR,

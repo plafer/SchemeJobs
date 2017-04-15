@@ -1,5 +1,7 @@
+obj/
 .emacs
 TAGS
 testsuite
 lafscheme
-obj/
+src/lex.yy.c
+src/parser.tab.*

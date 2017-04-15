@@ -16,7 +16,7 @@ OBJ_FILES := $(subst $(SRCDIR)/,$(OBJDIR)/,$(OBJ_FILES))
 ## Test suite provides its own main(), so we filter ours out.
 OBJ_FILES_TEST := $(filter-out obj/main.o, $(OBJ_FILES))
 
-CFLAGS := -Wall -Wextra -I.
+CFLAGS := -Wall -Wextra -I. -lfl
 CFLAGS_DEBUG := $(CFLAGS) -gstabs
 CFLAGS_PROD := $(CFLAGS) -O3 -Werror
 
@@ -29,6 +29,16 @@ debug: TAGS $(OBJ_FILES) $(INC_FILES)
 ## TODO: Validate that prod executable files don't end up with stabs symbols
 $(OBJDIR)/%.o: $(OBJDIR) $(SRC_FILES)
 	$(CC) $(CFLAGS_DEBUG) -o $@ -c $(SRCDIR)/$*.c
+
+## We don't want warnings on when compiling generated c files.
+$(OBJDIR)/lex.yy.o: $(SRCDIR)/lex.yy.c
+	$(CC) -I. -O3 -lfl -o $@ -c $<
+
+$(SRCDIR)/lex.yy.c: $(SRCDIR)/lexer.l
+	flex -o $@ $<
+
+$(SRCDIR)/parser.tab.c: $(SRCDIR)/parser.y
+	bison -o $@ --defines=$(SRCDIR)/parser.tab.h $<
 
 .PHONY: testsuite
 testsuite: $(OBJ_FILES_TEST) $(INC_FILES)
