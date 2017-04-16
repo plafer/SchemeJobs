@@ -34,4 +34,6 @@ int prmt_mult(struct astnode_pair *args, struct astnode **ret);
 int prmt_div(struct astnode_pair *args, struct astnode **ret);
 int prmt_equal(struct astnode_pair *args, struct astnode **ret);
 
+int prmt_is_eq(struct astnode_pair *args, struct astnode **ret);
+
 #endif

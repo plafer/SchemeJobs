@@ -759,6 +759,127 @@ void TestEqual_WrongType(CuTest *tc) {
   CuAssertIntEquals(tc, EBADMSG, err);
 }
 
+void TestIsEq_NullArgs(CuTest *tc) {
+  int err;
+
+  err = prmt_is_eq(NULL, NULL);
+  CuAssertIntEquals(tc, EINVAL, err);
+}
+
+void TestIsEq_NoArgs(CuTest *tc) {
+  int err;
+  struct astnode_boolean *ret;
+  struct astnode_pair *first_pair = EMPTY_LIST;
+
+  err = prmt_is_eq(first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestIsEq_OneArg(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_int *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+
+  err = prmt_is_eq(&first_pair, (struct astnode **)&ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+void TestIsEq_ValidObjTrue(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_boolean *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_is_eq(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
+  CuAssertIntEquals(tc, 1, (int) ret->boolval);
+}
+
+void TestIsEq_ValidObjFalse(CuTest *tc) {
+  const int VAL1 = 3;
+  int err;
+  struct astnode_boolean *ret;
+
+  struct astnode_int num1 = {
+    .type = TYPE_INT,
+    .intval = VAL1
+  };
+  struct astnode_pair sec_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) BOOLEAN_FALSE,
+    .cdr = (struct astnode *) EMPTY_LIST
+  };
+  struct astnode_pair first_pair = {
+    .type = TYPE_PAIR,
+    .car = (struct astnode *) &num1,
+    .cdr = (struct astnode *) &sec_pair
+  };
+
+  err = prmt_is_eq(&first_pair, (struct astnode **) &ret);
+  CuAssertIntEquals(tc, 0, err);
+  CuAssertIntEquals(tc, TYPE_BOOLEAN, ret->type);
+  CuAssertIntEquals(tc, 0, (int) ret->boolval);
+}
+
+void TestIsEq_TooManyArgs(CuTest *tc) {
+  const int VAL1 = 42;
+  const int VAL2 = 56;
+  int err;
+  struct astnode_int num1;
+  struct astnode_int num2;
+  struct astnode_pair first_pair;
+  struct astnode_pair sec_pair;
+  struct astnode_pair third_pair;
+  struct astnode_boolean *ret;
+
+  num1.type = TYPE_INT;
+  num1.intval = VAL1;
+
+  num2.type = TYPE_INT;
+  num2.intval = VAL2;
+
+  first_pair.type = TYPE_PAIR;
+  first_pair.car = (struct astnode *) &num1;
+  first_pair.cdr = (struct astnode *) &sec_pair;
+
+  sec_pair.type = TYPE_PAIR;
+  sec_pair.car = (struct astnode *) &num2;
+  sec_pair.cdr = (struct astnode *) &third_pair;
+
+  third_pair.type = TYPE_PAIR;
+  third_pair.car = (struct astnode *) &num2;
+  third_pair.cdr = (struct astnode *)EMPTY_LIST;
+
+  err = prmt_is_eq(&first_pair,  (struct astnode **)&ret);
+  CuAssertIntEquals(tc, EBADMSG, err);
+}
+
+
 CuSuite* PrmtGetSuite() {
   CuSuite* suite = CuSuiteNew();
 
@@ -803,6 +924,12 @@ CuSuite* PrmtGetSuite() {
   SUITE_ADD_TEST(suite, TestEqual_ValidObjTrue);
   SUITE_ADD_TEST(suite, TestEqual_ValidObjFalse);
   SUITE_ADD_TEST(suite, TestEqual_WrongType);
+  SUITE_ADD_TEST(suite, TestIsEq_NullArgs);
+  SUITE_ADD_TEST(suite, TestIsEq_NoArgs);
+  SUITE_ADD_TEST(suite, TestIsEq_OneArg);
+  SUITE_ADD_TEST(suite, TestIsEq_ValidObjTrue);
+  SUITE_ADD_TEST(suite, TestIsEq_ValidObjFalse);
+  SUITE_ADD_TEST(suite, TestIsEq_TooManyArgs);
 
   return suite;
 }

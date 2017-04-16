@@ -263,3 +263,61 @@ int prmt_equal(struct astnode_pair *args, struct astnode **ret)
 
   return 0;
 }
+
+int prmt_is_eq(struct astnode_pair *args, struct astnode **ret)
+{
+  struct astnode *first;
+  struct astnode *second;
+  bool eq;
+
+  NULL_CHECK2(args, ret);
+
+  if (is_empty_list((struct astnode *)args))
+    return EBADMSG;
+  first = args->car;
+
+  args = (struct astnode_pair *)args->cdr;
+  TYPE_CHECK(args, TYPE_PAIR);
+  second = args->car;
+
+  if (!is_empty_list(args->cdr))
+    return EBADMSG;
+
+  // If we get here, arguments are valid
+  RETONERR(alloc_astnode(TYPE_BOOLEAN, ret));
+
+  if (first->type != second->type)
+    {
+      ((struct astnode_boolean *)*ret)->boolval = false;
+      return 0;
+    }
+
+  switch(first->type)
+    {
+    case TYPE_SYM:
+      eq = ((struct astnode_sym *)first)->symi ==
+	((struct astnode_sym *)second)->symi;
+      break;
+    case TYPE_INT:
+      eq = ((struct astnode_int *)first)->intval ==
+	((struct astnode_int *)second)->intval;
+      break;
+    case TYPE_BOOLEAN:
+      eq = ((struct astnode_boolean *)first)->boolval ==
+	((struct astnode_boolean *)second)->boolval;
+      break;
+    case TYPE_PAIR:
+    case TYPE_ENV:
+    case TYPE_KEYWORD:
+    case TYPE_PRMTPROC:
+    case TYPE_COMPPROC:
+      eq = (first == second);
+      break;
+    case TYPE_MAX:
+      return EBADMSG;
+    }
+
+  ((struct astnode_boolean *)*ret)->boolval = eq;
+
+  return 0;
+}
