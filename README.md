@@ -1,12 +1,12 @@
 ## Overview
 SchemeJobs is a toy Scheme interpreter written in C.
 
-# Building and running
+## Building and running
 
     $ make && sudo make install
     $ schemejobs [-i init_file_path]
 
-# Running tests
+## Running tests
 
     $ make testsuite
 
