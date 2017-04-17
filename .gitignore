@@ -2,6 +2,6 @@ obj/
 .emacs
 TAGS
 testsuite
-lafscheme
+schemejobs
 src/lex.yy.c
 src/parser.tab.*

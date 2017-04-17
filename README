@@ -1,10 +1,10 @@
 ## Overview
-Lafscheme is a toy Scheme interpreter written in C.
+SchemeJobs is a toy Scheme interpreter written in C.
 
 # Building and running
 
     $ make && sudo make install
-    $ lafscheme [-i init_file_path]
+    $ schemejobs [-i init_file_path]
 
 # Running tests
 

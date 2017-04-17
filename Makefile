@@ -1,4 +1,4 @@
-OUT_BIN_NAME := lafscheme
+OUT_BIN_NAME := schemejobs
 
 SRCDIR := src
 INCDIR := inc
@@ -46,7 +46,7 @@ testsuite: $(OBJ_FILES_TEST) $(INC_FILES)
 	./$@
 
 install:
-	mv -f lafscheme /usr/local/bin/
+	mv -f $(OUT_BIN_NAME) /usr/local/bin/
 	cp -f scminit.scm /usr/local/etc/
 
 .PHONY: TAGS
