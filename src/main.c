@@ -1,11 +1,15 @@
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include "inc/ast.h"
 #include "inc/env.h"
 #include "inc/eval.h"
 #include "inc/stdmacros.h"
 #include "inc/symbols.h"
 #include "parser.tab.h"
+
+#define DEFAULT_INIT_PATH "/usr/local/etc/scminit.scm"
 
 void yyrestart(FILE *);
 
@@ -94,15 +98,49 @@ static void print_exp(struct astnode *root)
     }
 }
 
+static void load_init_file(struct astnode_env *env, char *path)
+{
+  int err;
+  FILE *init_file;
+  struct astnode *parsed_result;
+  struct astnode *dummy;
 
-int main()
+  init_file = fopen(path, "r");
+  if (init_file == NULL)
+    {
+      perror("Error opening init file");
+      return;
+    }
+
+  yyrestart(init_file);
+  if (yyparse(false, &parsed_result) != 0)
+    {
+      fprintf(stderr, "Error parsing init file.\n");
+      return;
+    }
+
+  err = eval_many((struct astnode_pair *)parsed_result, env, &dummy);
+  if (err != 0)
+    {
+      fprintf(stderr, "Error evaluating init file: %d\n", err);
+    }
+}
+
+
+int main(int argc, char **argv)
 {
   int err;
   struct astnode_env *env;
   struct astnode_pair *parsed_exp;
   struct astnode *evaled_exp;
+  char *init_path = DEFAULT_INIT_PATH;
+
+  if (argc >= 3 && strcmp("-i", argv[1]) == 0)
+    init_path = argv[2];
 
   RETONERR(make_top_level_env(&env));
+
+  load_init_file(env, init_path);
 
   printf("Welcome back!\n");
   printf("Keep hacking, keep rocking \\m/\n\n");
