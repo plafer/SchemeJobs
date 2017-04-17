@@ -45,6 +45,10 @@ testsuite: $(OBJ_FILES_TEST) $(INC_FILES)
 	$(CC) -o $@ $(CFLAGS_DEBUG) $(TESTS_FILES) $(OBJ_FILES_TEST)
 	./$@
 
+install:
+	mv -f lafscheme /usr/local/bin/
+	cp -f scminit.scm /usr/local/etc/
+
 .PHONY: TAGS
 TAGS:
 	find . -name "*.[chS]" -print | xargs etags --append
