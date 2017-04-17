@@ -17,7 +17,7 @@ int got_boolean(void);
 int got_sym(void);
 %}
 
-INT        [0-9]+
+INT        -?[0-9]+
 BOOLEAN    #[tf]
 SYM        [a-zA-Z_\-?+*/=]+
 
