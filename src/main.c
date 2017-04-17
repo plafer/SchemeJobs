@@ -99,7 +99,7 @@ int main()
 {
   int err;
   struct astnode_env *env;
-  struct astnode *parsed_exp;
+  struct astnode_pair *parsed_exp;
   struct astnode *evaled_exp;
 
   RETONERR(make_top_level_env(&env));
@@ -111,13 +111,13 @@ int main()
     {
       printf(">> ");
       yyrestart(stdin);
-      err = yyparse(true, &parsed_exp);
+      err = yyparse(true, (struct astnode **)&parsed_exp);
       if (err != 0)
 	{
 	  fprintf(stderr, "There was an error when parsing.\n");
 	  continue;
 	}
-      if ((err = eval(parsed_exp, env, &evaled_exp)) != 0)
+      if ((err = eval_many(parsed_exp, env, &evaled_exp)) != 0)
 	{
 	  if (err == EBADMSG)
 	    printf("Invalid input.");
